@@ -92,7 +92,8 @@ async function logTokenEventInfo(eventType, _from, _to, _amount, rpcLink, dex, b
       ],
     };
 
-const formattedAmount = parseFloat(_amount).toLocaleString().replace(/,/g, '');
+const formattedAmount = parseFloat(_amount).toLocaleString().replace(/\./g, '').replace(/,/g, '.');
+
 
 
  const msg = `
