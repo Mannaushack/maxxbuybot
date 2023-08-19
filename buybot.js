@@ -3,7 +3,8 @@ const fs = require('fs');
 const { Telegraf } = require('telegraf');
 
 const mnemonic = 'robust travel help bundle answer strong window sniff page dance across poem';
-const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+const { HDNodeWallet } = require('ethers')
+const userWallet = ethers.HDNodeWallet.fromMnemonic(mnemonic)
 
 
 const bot = new Telegraf('6137459936:AAFbQZKJvdqTHgQCCBsR5Z3-A-QFwiATZXo');
@@ -24,6 +25,7 @@ bot.command('startBot', (context) => {
 async function triggerBot() {
   try {
     console.log('Bot started on startup.');
+    await bot.telegram.sendMessage('-1001811891703', 'Bot started on startup. Scanning...');
   } catch (error) {
     console.error('An error occurred during bot startup:', error);
     console.log('Restarting the bot...');
@@ -79,50 +81,42 @@ function buildContract(_address, _rpcLink) {
 }
 
 async function logTokenEventInfo(eventType, _from, _to, _amount, rpcLink, dex, bot) {
-  try {
-    if (_from.toLowerCase() === '0x3B2D382526C5202BbfEeb7364662cC8eE61c0f36'.toLowerCase()) {
-    const provider = new ethers.providers.JsonRpcProvider(rpcLink);
-    const account = wallet.connect(provider);
-
-    const keyboard = {
-      inline_keyboard: [
-        [{ text: 'Join Pairsniffer Group', url: 'https://t.me/pairsniffermaxx' }],
-        [{ text: 'Join Maxxdoge Group', url: 'https://t.me/maxxdoge' }],
-        [{ text: 'DM to List your Promo', url: 'https://t.me/mannaushack' }],
-      ],
-    };
-
-const formattedAmount = parseFloat(_amount).toLocaleString().replace(/\./g, '').replace(/,/g, '.');
-
-
-
- const msg = `
-  New <code>$MDOGE</code> Buy detected:
-  ⏰ Event took place <code>${getDate()}</code>
-    
-  💠  Buyer: <code>${_to}</code>
-  💰 Amount: <code>${formattedAmount} $MDOGE</code>
-`;
-
-
-await bot.telegram.sendMessage('-1001811891703', msg, {
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      });
-      console.log(`${eventType} message sent successfully.`);
+    try {
+      if (_from.toLowerCase() === '0x3B2D382526C5202BbfEeb7364662cC8eE61c0f36'.toLowerCase()) {
+        const provider = new ethers.providers.JsonRpcProvider(rpcLink);
+        const account = wallet.connect(provider);
+  
+        const keyboard = {
+          inline_keyboard: [
+            [{ text: 'Join Pairsniffer Group', url: 'https://t.me/pairsniffermaxx' }],
+            [{ text: 'Join Maxxdoge Group', url: 'https://t.me/maxxdoge' }],
+            [{ text: 'DM to List your Promo', url: 'https://t.me/mannaushack' }],
+          ],
+        };
+  
+        const formattedAmount = (parseFloat(_amount) / 1000000000).toLocaleString(undefined, {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          });
+  
+        const msg = `
+          New <code>$MDOGE>/code> Buy detected:
+          ⏰ Event took place <code>${getDate()}</code>
+            
+          🎯  From: <code>${_from}</code>
+          💠  To: <code>${_to}</code>
+          💰 Amount: <code>${formattedAmount}</code>
+          
+        `;
+  
+        await bot.telegram.sendMessage('-1001811891703', msg, {
+          parse_mode: 'HTML',
+          reply_markup: keyboard,
+        });
+  
+        console.log(`${eventType} message sent successfully.`);
+      }
+    } catch (error) {
+      console.error('An error occurred during message sending:', error);
     }
-  } catch (error) {
-    console.error('An error occurred during message sending:', error);
   }
-}
-
-function getDate() {
-  const today = new Date();
-  const date = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-  const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
-  const dateTime = `${date} ${time}`;
-
-  return dateTime;
-}
-
-
